@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Dashboard 2025</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css">
+  
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href = style.css>
+  
+
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <div class="logo">
+        <i class="fas fa-cube"></i>
+        <span>InteractiveDash 2025</span>
+      </div>
+      <button id="theme-toggle" class="theme-toggle">
+        <i class="fas fa-moon"></i>
+      </button>
+    </header>
+    
+    <main>
+      <!-- Stats Section -->
+      <div class="stats-container">
+        <div class="stat-card primary">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-value" id="visits-count">2,458</div>
+          <div class="stat-label">Total Visits</div>
+        </div>
+        
+        <div class="stat-card success">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-value" id="users-count">1,385</div>
+          <div class="stat-label">Active Users</div>
+        </div>
+        
+        <div class="stat-card warning">
+          <div class="stat-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-value" id="sales-count">5,249/-</div>
+          <div class="stat-label">Total Sales</div>
+        </div>
+        
+        <div class="stat-card info">
+          <div class="stat-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="stat-value" id="tasks-count">64%</div>
+          <div class="stat-label">Tasks Completed</div>
+        </div>
+      </div>
+      
+      <!-- Dashboard Widgets -->
+      <div class="dashboard">
+        <!-- Live Counter Widget -->
+        <div class="card widget-third">
+          <div class="card-header">
+            <div class="card-title">Live Counter</div>
+            <div class="card-icon">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+          </div>
+          <div class="counter-container">
+            <div class="counter-value" id="counter-value">0</div>
+            <div class="counter-label">Counter Value</div>
+            <div class="counter-controls">
+              <button class="counter-btn" id="decrement-btn">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button class="counter-btn" id="increment-btn">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button class="counter-btn" id="reset-btn">
+                <i class="fas fa-undo"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chart Widget -->
+        <div class="card widget-third">
+          <div class="card-header">
+            <div class="card-title">Data Visualization</div>
+            <div class="card-icon">
+              <i class="fas fa-chart-pie"></i>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="dataChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Live Search Widget -->
+        <div class="card widget-third">
+          <div class="card-header">
+            <div class="card-title">Live Search</div>
+            <div class="card-icon">
+              <i class="fas fa-search"></i>
+            </div>
+          </div>
+          <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Search items...">
+            <div class="search-results" id="search-results">
+              <!-- Search results will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Interactive Form Widget -->
+        <div class="card widget-half">
+          <div class="card-header">
+            <div class="card-title">Interactive Form</div>
+            <div class="card-icon">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+          </div>
+          <div class="form-container">
+            <form id="interactive-form">
+              <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" placeholder="Enter your username">
+                <div class="invalid-feedback">Username must be at least 3 characters long</div>
+              </div>
+              
+              <div class="form-group">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                <div class="invalid-feedback">Please enter a valid email address</div>
+              </div>
+              
+              <div class="form-group">
+                <label for="interest" class="form-label">Area of Interest</label>
+                <select class="form-select" id="interest">
+                  <option value="">Select an option</option>
+                  <option value="technology">Technology</option>
+                  <option value="design">Design</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="business">Business</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Notification Preferences</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="email-notifications">
+                  <label class="form-check-label" for="email-notifications">Email Notifications</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="sms-notifications">
+                  <label class="form-check-label" for="sms-notifications">SMS Notifications</label>
+                </div>
+              </div>
+              
+              <div id="additional-settings" class="conditional-section">
+                <h4>Additional Settings</h4>
+                <div class="form-group">
+                  <label for="frequency" class="form-label">Notification Frequency</label>
+                  <select class="form-select" id="frequency">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Activity Timeline Widget -->
+        <div class="card widget-half">
+          <div class="card-header">
+            <div class="card-title">Activity Timeline</div>
+            <div class="card-icon">
+              <i class="fas fa-history"></i>
+            </div>
+          </div>
+          <div id="timeline-container">
+            <div class="spinner" id="timeline-spinner"></div>
+            <div id="timeline-content" style="display: none;">
+              <!-- Timeline content will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  
+  <script src ="script.js"></script>
+  
+ 
+</body>
+</html>
