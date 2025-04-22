@@ -1,225 +1,251 @@
-$(document).ready(function() {
-    // Initialize variables and state
-    let counterValue = localStorage.getItem('counterValue') ? parseInt(localStorage.getItem('counterValue')) : 0;
-    let darkMode = localStorage.getItem('darkMode') === 'true';
-    
-    // Sample data for search functionality
-    const searchData = [
-      { id: 1, title: 'Dashboard Overview', subtitle: 'Main dashboard page' },
-      { id: 2, title: 'User Profile', subtitle: 'User settings and preferences' },
-      { id: 3, title: 'Analytics', subtitle: 'Data visualization and reports' },
-      { id: 4, title: 'Task Management', subtitle: 'Create and manage tasks' },
-      { id: 5, title: 'Calendar', subtitle: 'Schedule events and reminders' },
-      { id: 6, title: 'Messages', subtitle: 'Inbox and communication' },
-      { id: 7, title: 'Settings', subtitle: 'Application configuration' },
-      { id: 8, title: 'Team Members', subtitle: 'Manage team and roles' }
-    ];
-    
-    // Timeline data (will be fetched from API)
-    const timelineData = [
-      { id: 1, title: 'Project Created', time: '2 hours ago', icon: 'fas fa-plus-circle' },
-      { id: 2, title: 'New Team Member Added', time: 'Yesterday', icon: 'fas fa-user-plus' },
-      { id: 3, title: 'Client Meeting', time: '3 days ago', icon: 'fas fa-handshake' },
-      { id: 4, title: 'Task Completed', time: 'Last week', icon: 'fas fa-check-circle' },
-      { id: 5, title: 'Project Milestone Reached', time: '2 weeks ago', icon: 'fas fa-flag' }
-    ];
-    
-    // Apply dark mode if set
-    if (darkMode) {
-      $('body').addClass('dark-mode');
-      $('#theme-toggle i').removeClass('fa-moon').addClass('fa-sun');
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Quill editor
+  const quill = new Quill('#editor', {
+    theme: 'snow',
+    placeholder: 'Write your post content here...',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['link', 'image', 'code-block'],
+        ['clean']
+      ]
     }
-    
-    // Set initial counter value
-    $('#counter-value').text(counterValue);
-    
-    // Initialize Chart
-    const ctx = document.getElementById('dataChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-          label: 'Monthly Performance',
-          data: [65, 59, 80, 81, 56, 90],
-          backgroundColor: '#6c5ce7',
-          borderColor: '#6c5ce7',
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-    
-    // Counter functionality
-    $('#increment-btn').on('click', function() {
-      counterValue++;
-      updateCounter();
-    });
-    
-    $('#decrement-btn').on('click', function() {
-      if (counterValue > 0) {
-        counterValue--;
-        updateCounter();
-      }
-    });
-    
-    $('#reset-btn').on('click', function() {
-      counterValue = 0;
-      updateCounter();
-    });
-    
-    function updateCounter() {
-      $('#counter-value').text(counterValue);
-      localStorage.setItem('counterValue', counterValue);
+  });
+  
+  // Set some initial content for the editor
+  quill.setContents([
+    { insert: 'React is a popular JavaScript library for building user interfaces, particularly single-page applications. It\'s used for handling the view layer in web and mobile apps. React allows us to create reusable UI components.\n\n' },
+    { insert: 'Why Learn React?\n', attributes: { header: 2 } },
+    { insert: 'There are several compelling reasons to learn React:\n' },
+    { insert: 'It\'s maintained by Facebook and used by thousands of companies\n', attributes: { list: 'bullet' } },
+    { insert: 'It has a strong community and ecosystem\n', attributes: { list: 'bullet' } },
+    { insert: 'It uses a virtual DOM which improves performance\n', attributes: { list: 'bullet' } },
+    { insert: 'It\'s component-based, making code reusable and maintainable\n\n', attributes: { list: 'bullet' } },
+    { insert: 'Getting Started\n', attributes: { header: 2 } },
+    { insert: 'To get started with React, you need to have Node.js installed. Then you can create a new React application using Create React App:\n\n' },
+    { insert: 'npx create-react-app my-app\ncd my-app\nnpm start\n\n', attributes: { 'code-block': true } },
+    { insert: 'This will create a new React application and start a development server.\n' }
+  ]);
+  
+  // AI Assistant Toggle
+  const aiAssistant = document.querySelector('.ai-assistant');
+  const aiHeader = document.querySelector('.ai-header');
+  
+  aiHeader.addEventListener('click', function() {
+    aiAssistant.classList.toggle('open');
+    const icon = this.querySelector('.fas');
+    icon.classList.toggle('fa-chevron-up');
+    icon.classList.toggle('fa-chevron-down');
+  });
+  
+  // Preview Toggle
+  const previewBtn = document.querySelector('.editor-btn.preview');
+  const editor = document.querySelector('.post-editor');
+  const preview = document.querySelector('.post-preview');
+  
+  previewBtn.addEventListener('click', function() {
+    if (editor.style.display !== 'none') {
+      showLoading('Generating preview...');
+      
+      setTimeout(() => {
+        editor.style.display = 'none';
+        preview.style.display = 'block';
+        hideLoading();
+      }, 800);
+    } else {
+      editor.style.display = 'block';
+      preview.style.display = 'none';
     }
-    
-    // Theme toggle functionality
-    $('#theme-toggle').on('click', function() {
-      $('body').toggleClass('dark-mode');
-      const isDarkMode = $('body').hasClass('dark-mode');
-      
-      if (isDarkMode) {
-        $(this).find('i').removeClass('fa-moon').addClass('fa-sun');
-      } else {
-        $(this).find('i').removeClass('fa-sun').addClass('fa-moon');
-      }
-      
-      localStorage.setItem('darkMode', isDarkMode);
-    });
-    
-    // Search functionality
-    $('#search-input').on('keyup', function() {
-      const searchTerm = $(this).val().toLowerCase();
-      
-      if (searchTerm.length === 0) {
-        $('#search-results').empty();
-        return;
-      }
-      
-      const filteredResults = searchData.filter(item => 
-        item.title.toLowerCase().includes(searchTerm) || 
-        item.subtitle.toLowerCase().includes(searchTerm)
-      );
-      
-      displaySearchResults(filteredResults);
-    });
-    
-    function displaySearchResults(results) {
-      const $searchResults = $('#search-results');
-      $searchResults.empty();
-      
-      if (results.length === 0) {
-        $searchResults.append('<div class="search-item">No results found</div>');
-        return;
-      }
-      
-      results.forEach(result => {
-        const $searchItem = $(`
-          <div class="search-item scale-in">
-            <div class="search-item-title">${result.title}</div>
-            <div class="search-item-subtitle">${result.subtitle}</div>
-          </div>
-        `);
-        
-        $searchResults.append($searchItem);
-      });
-    }
-    
-    // Form validation and interaction
-    $('#interactive-form').on('submit', function(e) {
+  });
+  
+  // Tag Input Functionality
+  const tagInput = document.querySelector('.tag-input');
+  const tagContainer = document.querySelector('.tag-input-container');
+  
+  tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && this.value.trim()) {
       e.preventDefault();
       
-      let isValid = true;
+      const tagText = this.value.trim();
+      const tagElement = document.createElement('div');
+      tagElement.className = 'tag';
+      tagElement.innerHTML = `
+        <span>${tagText}</span>
+        <i class="fas fa-times tag-remove"></i>
+      `;
       
-      // Username validation
-      const username = $('#username').val();
-      if (username.length < 3) {
-        $('#username').addClass('is-invalid');
-        isValid = false;
-      } else {
-        $('#username').removeClass('is-invalid');
-      }
+      tagContainer.insertBefore(tagElement, this);
+      this.value = '';
       
-      // Email validation
-      const email = $('#email').val();
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        $('#email').addClass('is-invalid');
-        isValid = false;
-      } else {
-        $('#email').removeClass('is-invalid');
-      }
-      
-      if (isValid) {
-        // Save form data to localStorage
-        const formData = {
-          username: username,
-          email: email,
-          interest: $('#interest').val(),
-          emailNotifications: $('#email-notifications').is(':checked'),
-          smsNotifications: $('#sms-notifications').is(':checked'),
-          frequency: $('#frequency').val()
-        };
-        
-        localStorage.setItem('formData', JSON.stringify(formData));
-        
-        // Show success message
-        alert('Settings saved successfully!');
-      }
-    });
-    
-    // Conditional display based on checkbox state
-    $('#email-notifications, #sms-notifications').on('change', function() {
-      if ($('#email-notifications').is(':checked') || $('#sms-notifications').is(':checked')) {
-        $('#additional-settings').addClass('active');
-      } else {
-        $('#additional-settings').removeClass('active');
-      }
-    });
-    
-    // Load form data from localStorage if available
-    if (localStorage.getItem('formData')) {
-      const formData = JSON.parse(localStorage.getItem('formData'));
-      
-      $('#username').val(formData.username);
-      $('#email').val(formData.email);
-      $('#interest').val(formData.interest);
-      $('#email-notifications').prop('checked', formData.emailNotifications);
-      $('#sms-notifications').prop('checked', formData.smsNotifications);
-      $('#frequency').val(formData.frequency);
-      
-      // Show conditional section if needed
-      if (formData.emailNotifications || formData.smsNotifications) {
-        $('#additional-settings').addClass('active');
-      }
-    }
-    
-    // Simulate loading timeline data (would be an API call)
-    setTimeout(function() {
-      $('#timeline-spinner').hide();
-      $('#timeline-content').show();
-      
-      // Populate timeline
-      timelineData.forEach(item => {
-        const timelineItem = `
-          <div class="search-item fade-in">
-            <div class="search-item-title">
-              <i class="${item.icon}" style="color: var(--primary); margin-right: 10px;"></i>
-              ${item.title}
-            </div>
-            <div class="search-item-subtitle">${item.time}</div>
-          </div>
-        `;
-        
-        $('#timeline-content').append(timelineItem);
+      // Add event listener to remove tag
+      tagElement.querySelector('.tag-remove').addEventListener('click', function() {
+        tagElement.remove();
       });
+    }
+  });
+  
+  // Add event listeners to existing tag remove buttons
+  document.querySelectorAll('.tag-remove').forEach(button => {
+    button.addEventListener('click', function() {
+      this.parentElement.remove();
+    });
+  });
+  
+  // Media Uploader Click
+  const mediaUploader = document.querySelector('.media-uploader');
+  
+  mediaUploader.addEventListener('click', function() {
+    // In a real app, this would open a file selector
+    // For this prototype, we'll show a toast notification
+    showToast('File upload will be implemented in the full version');
+  });
+  
+  // Publish Button
+  const publishBtn = document.querySelector('.editor-btn.publish');
+  
+  publishBtn.addEventListener('click', function() {
+    showLoading('Publishing your post...');
+    
+    // Simulate API call
+    setTimeout(() => {
+      hideLoading();
+      showToast('Post published successfully!', 'success');
     }, 1500);
   });
+  
+  // Save Draft Button
+  const saveDraftBtn = document.querySelector('.editor-btn.save-draft');
+  
+  saveDraftBtn.addEventListener('click', function() {
+    showLoading('Saving draft...');
+    
+    // Simulate API call
+    setTimeout(() => {
+      hideLoading();
+      showToast('Draft saved successfully!', 'success');
+    }, 1000);
+  });
+  
+  // Delete Button Handlers
+  const deleteButtons = document.querySelectorAll('.action-btn.delete');
+  const deleteModal = document.getElementById('deleteModal');
+  const closeModalBtn = document.querySelector('.modal-close');
+  const cancelDeleteBtn = document.querySelector('.modal-btn.cancel');
+  const confirmDeleteBtn = document.querySelector('.modal-btn.delete');
+  
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      deleteModal.classList.add('active');
+    });
+  });
+  
+  function closeModal() {
+    deleteModal.classList.remove('active');
+  }
+  
+  closeModalBtn.addEventListener('click', closeModal);
+  cancelDeleteBtn.addEventListener('click', closeModal);
+  
+  confirmDeleteBtn.addEventListener('click', function() {
+    showLoading('Deleting post...');
+    
+    // Simulate API call
+    setTimeout(() => {
+      hideLoading();
+      closeModal();
+      showToast('Post deleted successfully!', 'success');
+    }, 1000);
+  });
+  
+  // New Post Button
+  const newPostBtn = document.querySelector('.create-post-btn');
+  
+  newPostBtn.addEventListener('click', function() {
+    showLoading('Creating new post...');
+    
+    // Simulate API call
+    setTimeout(() => {
+      // Clear editor
+      quill.setText('');
+      document.getElementById('title').value = '';
+      
+      // Remove all tags except the input
+      const tags = document.querySelectorAll('.tag');
+      tags.forEach(tag => tag.remove());
+      
+      hideLoading();
+      showToast('New post created!', 'success');
+    }, 1000);
+  });
+  
+  // AI Assistant Button Handlers
+  const acceptAIBtn = document.querySelector('.ai-btn.accept');
+  const ignoreAIBtn = document.querySelector('.ai-btn.ignore');
+  
+  acceptAIBtn.addEventListener('click', function() {
+    showLoading('Applying AI suggestions...');
+    
+    // Simulate API call
+    setTimeout(() => {
+      hideLoading();
+      showToast('AI suggestions applied!', 'success');
+      
+      // Close AI assistant
+      aiAssistant.classList.remove('open');
+    }, 1200);
+  });
+  
+  ignoreAIBtn.addEventListener('click', function() {
+    // Close AI assistant
+    aiAssistant.classList.remove('open');
+    showToast('AI suggestions ignored', 'info');
+  });
+  
+  // Share Buttons
+  const shareButtons = document.querySelectorAll('.share-btn');
+  
+  shareButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      showToast('Sharing functionality will be implemented in the full version');
+    });
+  });
+  
+  // Helper Functions
+  function showLoading(message = 'Loading...') {
+    const loadingContainer = document.querySelector('.loading-container');
+    const loadingText = document.querySelector('.loading-text');
+    
+    loadingText.textContent = message;
+    loadingContainer.classList.add('active');
+  }
+  
+  function hideLoading() {
+    const loadingContainer = document.querySelector('.loading-container');
+    loadingContainer.classList.remove('active');
+  }
+  
+  function showToast(message, type = 'info') {
+    const bgColors = {
+      success: 'linear-gradient(to right, #10b981, #059669)',
+      error: 'linear-gradient(to right, #ef4444, #dc2626)',
+      info: 'linear-gradient(to right, #4f46e5, #4338ca)',
+      warning: 'linear-gradient(to right, #f59e0b, #d97706)'
+    };
+    
+    Toastify({
+      text: message,
+      duration: 3000,
+      gravity: "top",
+      position: "right",
+      style: {
+        background: bgColors[type],
+        borderRadius: "8px",
+        fontFamily: "'Inter', sans-serif",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+      }
+    }).showToast();
+  }
+});
