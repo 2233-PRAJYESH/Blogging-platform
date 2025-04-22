@@ -1,277 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BlogWave - Modern Blogging Platform</title>
-  
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Quill Rich Text Editor -->
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <!-- Toastify CSS for notifications -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimpleBlog - Your Blogging Platform</title>
   <link rel="stylesheet" href="style.css">
-  
-
 </head>
 <body>
-  <div class="app-container">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <i class="fas fa-pen-fancy"></i>
-          <span>BlogWave</span>
-        </div>
+  <header class="nav">
+    <div class="container nav-content">
+      <a href="#" class="nav-brand" id="home-link">SimpleBlog</a>
+      <div class="nav-links">
+        <a href="#" class="nav-link" id="home-nav">Home</a>
+        <a href="#" class="nav-link" id="new-post-nav">New Post</a>
       </div>
-      
-      <div class="post-list">
-        <div class="post-item active">
-          <div class="post-item-header">
-            <h3 class="post-title">Getting Started with React</h3>
-            <span class="post-status published">Published</span>
-          </div>
-          <div class="post-date">June 15, 2025</div>
-          <div class="post-actions">
-            <button class="action-btn edit"><i class="fas fa-edit"></i> Edit</button>
-            <button class="action-btn delete"><i class="fas fa-trash"></i> Delete</button>
-          </div>
-        </div>
-        
-        <div class="post-item">
-          <div class="post-item-header">
-            <h3 class="post-title">Advanced CSS Techniques</h3>
-            <span class="post-status draft">Draft</span>
-          </div>
-          <div class="post-date">June 10, 2025</div>
-          <div class="post-actions">
-            <button class="action-btn edit"><i class="fas fa-edit"></i> Edit</button>
-            <button class="action-btn delete"><i class="fas fa-trash"></i> Delete</button>
-          </div>
-        </div>
-        
-        <div class="post-item">
-          <div class="post-item-header">
-            <h3 class="post-title">The Future of Web Development</h3>
-            <span class="post-status published">Published</span>
-          </div>
-          <div class="post-date">June 5, 2025</div>
-          <div class="post-actions">
-            <button class="action-btn edit"><i class="fas fa-edit"></i> Edit</button>
-            <button class="action-btn delete"><i class="fas fa-trash"></i> Delete</button>
-          </div>
-        </div>
-      </div>
-      
-      <button class="create-post-btn">
-        <i class="fas fa-plus"></i>
-        <span>Create New Post</span>
-      </button>
     </div>
-    
-    <!-- Main Panel -->
-    <div class="main-panel">
-      <!-- Post Editor View -->
-      <div class="post-editor">
-        <div class="editor-header">
-          <h2 class="editor-title">Edit Post</h2>
-          <div class="editor-actions">
-            <button class="editor-btn preview">
-              <i class="fas fa-eye"></i>
-              <span>Preview</span>
-            </button>
-            <button class="editor-btn save-draft">
-              <i class="fas fa-save"></i>
-              <span>Save Draft</span>
-            </button>
-            <button class="editor-btn publish">
-              <i class="fas fa-paper-plane"></i>
-              <span>Publish</span>
-            </button>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <!-- Home Page / Post List -->
+      <div id="post-list-page">
+        <h1>Recent Posts</h1>
+        <div id="posts-container"></div>
+      </div>
+
+      <!-- Post Detail Page -->
+      <div id="post-detail-page" class="hidden">
+        <div id="post-detail-container" class="card"></div>
+        <button id="back-to-posts" class="btn">Back to Posts</button>
+      </div>
+
+      <!-- Create/Edit Post Page -->
+      <div id="post-form-page" class="hidden">
+        <h1 id="form-title">Create New Post</h1>
+        <div id="alert-container"></div>
+        <form id="blog-form" class="card">
+          <input type="hidden" id="post-id">
+          <div class="form-group">
+            <label for="post-title">Title</label>
+            <input type="text" id="post-title" class="form-control" required>
           </div>
-        </div>
-        
-        <form>
-          <div class="editor-form-group">
-            <label class="editor-label" for="title">Title</label>
-            <input type="text" id="title" class="editor-input" placeholder="Enter post title..." value="Getting Started with React">
+          <div class="form-group">
+            <label for="post-author">Author</label>
+            <input type="text" id="post-author" class="form-control" required>
           </div>
-          
-          <div class="editor-form-group">
-            <label class="editor-label">Tags</label>
-            <div class="tag-input-container">
-              <div class="tag">
-                <span>React</span>
-                <i class="fas fa-times tag-remove"></i>
-              </div>
-              <div class="tag">
-                <span>JavaScript</span>
-                <i class="fas fa-times tag-remove"></i>
-              </div>
-              <div class="tag">
-                <span>Frontend</span>
-                <i class="fas fa-times tag-remove"></i>
-              </div>
-              <input type="text" class="tag-input" placeholder="Add a tag...">
-            </div>
+          <div class="form-group">
+            <label for="post-content">Content</label>
+            <textarea id="post-content" class="form-control" required></textarea>
           </div>
-          
-          <div class="editor-form-group">
-            <label class="editor-label">Content</label>
-            <div id="editor" class="quill-editor"></div>
-          </div>
-          
-          <div class="editor-form-group">
-            <label class="editor-label">Featured Image</label>
-            <div class="media-uploader">
-              <i class="fas fa-cloud-upload-alt media-icon"></i>
-              <div class="media-text">Drag and drop an image, or click to browse</div>
-              <div class="media-subtext">Recommended size: 1200 x 630px</div>
-            </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-success" id="save-post">Publish Post</button>
+            <button type="button" class="btn" id="cancel-post">Cancel</button>
           </div>
         </form>
       </div>
+    </div>
+  </main>
 
-      <!-- Loading Spinner (hidden by default) -->
-      <div class="loading-container">
-        <div class="spinner"></div>
-        <div class="loading-text">Saving your post...</div>
-      </div>
-      
-      <!-- Post Preview View (hidden by default) -->
-      <div class="post-preview" style="display: none;">
-        <div class="preview-header">
-          <div>
-            <h1 class="preview-title">Getting Started with React</h1>
-            <div class="preview-meta">
-              <span><i class="far fa-calendar-alt"></i> June 15, 2025</span>
-              <span><i class="far fa-user"></i> You</span>
-            </div>
-          </div>
-          <div class="preview-actions">
-            <button class="preview-btn"><i class="fas fa-edit"></i></button>
-            <button class="preview-btn"><i class="fas fa-share-alt"></i></button>
-          </div>
-        </div>
-        
-        <div class="preview-tags">
-          <span class="preview-tag">React</span>
-          <span class="preview-tag">JavaScript</span>
-          <span class="preview-tag">Frontend</span>
-        </div>
-        
-        <div class="preview-content">
-          <p>React is a popular JavaScript library for building user interfaces, particularly single-page applications. It's used for handling the view layer in web and mobile apps. React allows us to create reusable UI components.</p>
-          
-          <img src="https://picsum.photos/800/400" alt="React code example" class="preview-image">
-          
-          <h2>Why Learn React?</h2>
-          <p>There are several compelling reasons to learn React:</p>
-          <ul>
-            <li>It's maintained by Facebook and used by thousands of companies</li>
-            <li>It has a strong community and ecosystem</li>
-            <li>It uses a virtual DOM which improves performance</li>
-            <li>It's component-based, making code reusable and maintainable</li>
-          </ul>
-          
-          <h2>Getting Started</h2>
-          <p>To get started with React, you need to have Node.js installed. Then you can create a new React application using Create React App:</p>
-          <pre><code>npx create-react-app my-app
-cd my-app
-npm start</code></pre>
-          
-          <p>This will create a new React application and start a development server.</p>
-        </div>
-        
-        <div class="share-container">
-          <div class="share-title">Share this post</div>
-          <div class="share-buttons">
-            <div class="share-btn twitter">
-              <i class="fab fa-twitter"></i>
-            </div>
-            <div class="share-btn facebook">
-              <i class="fab fa-facebook-f"></i>
-            </div>
-            <div class="share-btn linkedin">
-              <i class="fab fa-linkedin-in"></i>
-            </div>
-          </div>
-          
-          <div class="email-toggle">
-            <label class="toggle-switch">
-              <input type="checkbox">
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Notify subscribers via email</span>
-          </div>
-        </div>
-      </div>
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 SimpleBlog - Your Blogging Platform</p>
     </div>
-  </div>
-  
-  <!-- AI Assistant Drawer -->
-  <div class="ai-assistant">
-    <div class="ai-header">
-      <div class="ai-title">
-        <i class="fas fa-robot ai-icon"></i>
-        <span>AI Writing Assistant</span>
-      </div>
-      <i class="fas fa-chevron-up"></i>
-    </div>
-    <div class="ai-content">
-      <div class="ai-message">
-        <p>I've analyzed your current draft and have some suggestions to improve your content:</p>
-        
-        <div class="ai-suggestion">
-          Consider adding a section about React Hooks, as they're an essential part of modern React development.
-        </div>
-        
-        <div class="ai-suggestion">
-          Your introduction could be stronger. Try starting with a problem statement that React solves.
-        </div>
-        
-        <div class="ai-actions">
-          <button class="ai-btn accept">Accept Suggestions</button>
-          <button class="ai-btn ignore">Ignore</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Delete Confirmation Modal (hidden by default) -->
-  <div class="modal" id="deleteModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">Delete Post</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p class="modal-text">Are you sure you want to delete this post? This action cannot be undone.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="modal-btn cancel">Cancel</button>
-        <button class="modal-btn delete">Delete</button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- External Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  
+  </footer>
   <script src="script.js"></script>
-   
-  </script>
+
+
 </body>
 </html>

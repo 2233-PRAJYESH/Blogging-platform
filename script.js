@@ -1,251 +1,310 @@
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize Quill editor
-  const quill = new Quill('#editor', {
-    theme: 'snow',
-    placeholder: 'Write your post content here...',
-    modules: {
-      toolbar: [
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'color': [] }, { 'background': [] }],
-        ['link', 'image', 'code-block'],
-        ['clean']
-      ]
-    }
-  });
-  
-  // Set some initial content for the editor
-  quill.setContents([
-    { insert: 'React is a popular JavaScript library for building user interfaces, particularly single-page applications. It\'s used for handling the view layer in web and mobile apps. React allows us to create reusable UI components.\n\n' },
-    { insert: 'Why Learn React?\n', attributes: { header: 2 } },
-    { insert: 'There are several compelling reasons to learn React:\n' },
-    { insert: 'It\'s maintained by Facebook and used by thousands of companies\n', attributes: { list: 'bullet' } },
-    { insert: 'It has a strong community and ecosystem\n', attributes: { list: 'bullet' } },
-    { insert: 'It uses a virtual DOM which improves performance\n', attributes: { list: 'bullet' } },
-    { insert: 'It\'s component-based, making code reusable and maintainable\n\n', attributes: { list: 'bullet' } },
-    { insert: 'Getting Started\n', attributes: { header: 2 } },
-    { insert: 'To get started with React, you need to have Node.js installed. Then you can create a new React application using Create React App:\n\n' },
-    { insert: 'npx create-react-app my-app\ncd my-app\nnpm start\n\n', attributes: { 'code-block': true } },
-    { insert: 'This will create a new React application and start a development server.\n' }
-  ]);
-  
-  // AI Assistant Toggle
-  const aiAssistant = document.querySelector('.ai-assistant');
-  const aiHeader = document.querySelector('.ai-header');
-  
-  aiHeader.addEventListener('click', function() {
-    aiAssistant.classList.toggle('open');
-    const icon = this.querySelector('.fas');
-    icon.classList.toggle('fa-chevron-up');
-    icon.classList.toggle('fa-chevron-down');
-  });
-  
-  // Preview Toggle
-  const previewBtn = document.querySelector('.editor-btn.preview');
-  const editor = document.querySelector('.post-editor');
-  const preview = document.querySelector('.post-preview');
-  
-  previewBtn.addEventListener('click', function() {
-    if (editor.style.display !== 'none') {
-      showLoading('Generating preview...');
-      
-      setTimeout(() => {
-        editor.style.display = 'none';
-        preview.style.display = 'block';
-        hideLoading();
-      }, 800);
+ // Main Application Logic
+ document.addEventListener('DOMContentLoaded', function() {
+  // Application State
+  const state = {
+    posts: [],
+    currentPost: null,
+    currentPage: 'post-list'
+  };
+
+  // DOM Elements
+  const pages = {
+    postList: document.getElementById('post-list-page'),
+    postDetail: document.getElementById('post-detail-page'),
+    postForm: document.getElementById('post-form-page')
+  };
+
+  const elements = {
+    postsContainer: document.getElementById('posts-container'),
+    postDetailContainer: document.getElementById('post-detail-container'),
+    blogForm: document.getElementById('blog-form'),
+    postTitle: document.getElementById('post-title'),
+    postAuthor: document.getElementById('post-author'),
+    postContent: document.getElementById('post-content'),
+    postId: document.getElementById('post-id'),
+    formTitle: document.getElementById('form-title'),
+    alertContainer: document.getElementById('alert-container')
+  };
+
+  // Navigation Elements
+  const homeLink = document.getElementById('home-link');
+  const homeNav = document.getElementById('home-nav');
+  const newPostNav = document.getElementById('new-post-nav');
+  const backToPostsButton = document.getElementById('back-to-posts');
+  const cancelPostButton = document.getElementById('cancel-post');
+
+  // Event Listeners for Navigation
+  homeLink.addEventListener('click', navigateToHome);
+  homeNav.addEventListener('click', navigateToHome);
+  newPostNav.addEventListener('click', navigateToNewPost);
+  backToPostsButton.addEventListener('click', navigateToHome);
+  cancelPostButton.addEventListener('click', navigateToHome);
+
+  // Event Listeners for Forms
+  elements.blogForm.addEventListener('submit', handlePostSubmit);
+
+  // Initialize the app
+  initializeApp();
+
+  // Functions
+  function initializeApp() {
+    loadPostsFromStorage();
+    navigateToHome();
+    renderPosts();
+  }
+
+  function loadPostsFromStorage() {
+    const storedPosts = localStorage.getItem('blogPosts');
+    if (storedPosts) {
+      state.posts = JSON.parse(storedPosts);
     } else {
-      editor.style.display = 'block';
-      preview.style.display = 'none';
+      // Add some sample posts if none exist
+      state.posts = [
+        {
+          id: 1,
+          title: 'Welcome to SimpleBlog',
+          content: 'This is your first post on SimpleBlog! Start sharing your thoughts with the world.',
+          author: 'Admin',
+          date: new Date().toISOString(),
+          likes: 5
+        },
+        {
+          id: 2,
+          title: 'Getting Started with Blogging',
+          content: 'Blogging is a great way to share your ideas and connect with others. Here are some tips to get started...',
+          author: 'Admin',
+          date: new Date().toISOString(),
+          likes: 3
+        }
+      ];
+      savePostsToStorage();
     }
-  });
-  
-  // Tag Input Functionality
-  const tagInput = document.querySelector('.tag-input');
-  const tagContainer = document.querySelector('.tag-input-container');
-  
-  tagInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && this.value.trim()) {
-      e.preventDefault();
+  }
+
+  function savePostsToStorage() {
+    localStorage.setItem('blogPosts', JSON.stringify(state.posts));
+  }
+
+  function showPage(pageId) {
+    state.currentPage = pageId;
+    
+    // Hide all pages
+    for (const key in pages) {
+      pages[key].classList.add('hidden');
+    }
+    
+    // Show the requested page
+    pages[pageId].classList.remove('hidden');
+  }
+
+  function navigateToHome(e) {
+    if (e) e.preventDefault();
+    showPage('postList');
+    renderPosts();
+  }
+
+  function navigateToPostDetail(postId) {
+    state.currentPost = state.posts.find(post => post.id === postId);
+    showPage('postDetail');
+    renderPostDetail();
+  }
+
+  function navigateToNewPost(e) {
+    if (e) e.preventDefault();
+    
+    // Reset form for a new post
+    elements.postId.value = '';
+    elements.postTitle.value = '';
+    elements.postAuthor.value = 'Guest';
+    elements.postContent.value = '';
+    elements.formTitle.textContent = 'Create New Post';
+    
+    showPage('postForm');
+  }
+
+  function navigateToEditPost(postId) {
+    const post = state.posts.find(post => post.id === postId);
+    if (post) {
+      state.currentPost = post;
+      elements.postId.value = post.id;
+      elements.postTitle.value = post.title;
+      elements.postAuthor.value = post.author;
+      elements.postContent.value = post.content;
+      elements.formTitle.textContent = 'Edit Post';
       
-      const tagText = this.value.trim();
-      const tagElement = document.createElement('div');
-      tagElement.className = 'tag';
-      tagElement.innerHTML = `
-        <span>${tagText}</span>
-        <i class="fas fa-times tag-remove"></i>
+      showPage('postForm');
+    }
+  }
+
+  function renderPosts() {
+    elements.postsContainer.innerHTML = '';
+    
+    if (state.posts.length === 0) {
+      elements.postsContainer.innerHTML = '<p>No posts yet. Be the first to create one!</p>';
+      return;
+    }
+    
+    // Sort posts by date (newest first)
+    const sortedPosts = [...state.posts].sort((a, b) => 
+      new Date(b.date) - new Date(a.date)
+    );
+    
+    sortedPosts.forEach(post => {
+      const postElement = document.createElement('div');
+      postElement.className = 'blog-post post-preview';
+      
+      const date = new Date(post.date);
+      const formattedDate = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      // Create a preview of the content (first 150 characters)
+      const contentPreview = post.content.length > 150 
+        ? post.content.substring(0, 150) + '...' 
+        : post.content;
+        
+      postElement.innerHTML = `
+        <h2 class="blog-title">${post.title}</h2>
+        <div class="blog-meta">By ${post.author} on ${formattedDate} • ${post.likes} likes</div>
+        <div class="blog-content">${contentPreview}</div>
+        <button class="btn">Read More</button>
       `;
       
-      tagContainer.insertBefore(tagElement, this);
-      this.value = '';
-      
-      // Add event listener to remove tag
-      tagElement.querySelector('.tag-remove').addEventListener('click', function() {
-        tagElement.remove();
-      });
+      postElement.addEventListener('click', () => navigateToPostDetail(post.id));
+      elements.postsContainer.appendChild(postElement);
+    });
+  }
+
+  function renderPostDetail() {
+    if (!state.currentPost) return;
+    
+    const post = state.currentPost;
+    const date = new Date(post.date);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    elements.postDetailContainer.innerHTML = `
+      <h1 class="blog-title">${post.title}</h1>
+      <div class="blog-meta">
+        By ${post.author} on ${formattedDate} • ${post.likes} likes
+        <button id="like-button" class="btn">👍 Like</button>
+      </div>
+      <div class="blog-content">${post.content.replace(/\n/g, '<br>')}</div>
+      <div class="post-controls">
+        <div class="action-buttons">
+          <button id="edit-post" class="btn">Edit Post</button>
+          <button id="delete-post" class="btn btn-danger">Delete Post</button>
+        </div>
+      </div>
+    `;
+    
+    // Add event listeners for edit and delete
+    document.getElementById('edit-post').addEventListener('click', () => 
+      navigateToEditPost(post.id)
+    );
+    
+    document.getElementById('delete-post').addEventListener('click', () => 
+      handleDeletePost(post.id)
+    );
+    
+    // Add like functionality
+    document.getElementById('like-button').addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleLikePost(post.id);
+    });
+  }
+
+  function handlePostSubmit(e) {
+    e.preventDefault();
+    
+    const title = elements.postTitle.value.trim();
+    const author = elements.postAuthor.value.trim() || 'Anonymous';
+    const content = elements.postContent.value.trim();
+    const postId = elements.postId.value;
+    
+    if (!title || !content) {
+      showAlert('Please fill in all required fields', 'danger');
+      return;
     }
-  });
-  
-  // Add event listeners to existing tag remove buttons
-  document.querySelectorAll('.tag-remove').forEach(button => {
-    button.addEventListener('click', function() {
-      this.parentElement.remove();
-    });
-  });
-  
-  // Media Uploader Click
-  const mediaUploader = document.querySelector('.media-uploader');
-  
-  mediaUploader.addEventListener('click', function() {
-    // In a real app, this would open a file selector
-    // For this prototype, we'll show a toast notification
-    showToast('File upload will be implemented in the full version');
-  });
-  
-  // Publish Button
-  const publishBtn = document.querySelector('.editor-btn.publish');
-  
-  publishBtn.addEventListener('click', function() {
-    showLoading('Publishing your post...');
     
-    // Simulate API call
-    setTimeout(() => {
-      hideLoading();
-      showToast('Post published successfully!', 'success');
-    }, 1500);
-  });
-  
-  // Save Draft Button
-  const saveDraftBtn = document.querySelector('.editor-btn.save-draft');
-  
-  saveDraftBtn.addEventListener('click', function() {
-    showLoading('Saving draft...');
-    
-    // Simulate API call
-    setTimeout(() => {
-      hideLoading();
-      showToast('Draft saved successfully!', 'success');
-    }, 1000);
-  });
-  
-  // Delete Button Handlers
-  const deleteButtons = document.querySelectorAll('.action-btn.delete');
-  const deleteModal = document.getElementById('deleteModal');
-  const closeModalBtn = document.querySelector('.modal-close');
-  const cancelDeleteBtn = document.querySelector('.modal-btn.cancel');
-  const confirmDeleteBtn = document.querySelector('.modal-btn.delete');
-  
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      deleteModal.classList.add('active');
-    });
-  });
-  
-  function closeModal() {
-    deleteModal.classList.remove('active');
-  }
-  
-  closeModalBtn.addEventListener('click', closeModal);
-  cancelDeleteBtn.addEventListener('click', closeModal);
-  
-  confirmDeleteBtn.addEventListener('click', function() {
-    showLoading('Deleting post...');
-    
-    // Simulate API call
-    setTimeout(() => {
-      hideLoading();
-      closeModal();
-      showToast('Post deleted successfully!', 'success');
-    }, 1000);
-  });
-  
-  // New Post Button
-  const newPostBtn = document.querySelector('.create-post-btn');
-  
-  newPostBtn.addEventListener('click', function() {
-    showLoading('Creating new post...');
-    
-    // Simulate API call
-    setTimeout(() => {
-      // Clear editor
-      quill.setText('');
-      document.getElementById('title').value = '';
-      
-      // Remove all tags except the input
-      const tags = document.querySelectorAll('.tag');
-      tags.forEach(tag => tag.remove());
-      
-      hideLoading();
-      showToast('New post created!', 'success');
-    }, 1000);
-  });
-  
-  // AI Assistant Button Handlers
-  const acceptAIBtn = document.querySelector('.ai-btn.accept');
-  const ignoreAIBtn = document.querySelector('.ai-btn.ignore');
-  
-  acceptAIBtn.addEventListener('click', function() {
-    showLoading('Applying AI suggestions...');
-    
-    // Simulate API call
-    setTimeout(() => {
-      hideLoading();
-      showToast('AI suggestions applied!', 'success');
-      
-      // Close AI assistant
-      aiAssistant.classList.remove('open');
-    }, 1200);
-  });
-  
-  ignoreAIBtn.addEventListener('click', function() {
-    // Close AI assistant
-    aiAssistant.classList.remove('open');
-    showToast('AI suggestions ignored', 'info');
-  });
-  
-  // Share Buttons
-  const shareButtons = document.querySelectorAll('.share-btn');
-  
-  shareButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      showToast('Sharing functionality will be implemented in the full version');
-    });
-  });
-  
-  // Helper Functions
-  function showLoading(message = 'Loading...') {
-    const loadingContainer = document.querySelector('.loading-container');
-    const loadingText = document.querySelector('.loading-text');
-    
-    loadingText.textContent = message;
-    loadingContainer.classList.add('active');
-  }
-  
-  function hideLoading() {
-    const loadingContainer = document.querySelector('.loading-container');
-    loadingContainer.classList.remove('active');
-  }
-  
-  function showToast(message, type = 'info') {
-    const bgColors = {
-      success: 'linear-gradient(to right, #10b981, #059669)',
-      error: 'linear-gradient(to right, #ef4444, #dc2626)',
-      info: 'linear-gradient(to right, #4f46e5, #4338ca)',
-      warning: 'linear-gradient(to right, #f59e0b, #d97706)'
-    };
-    
-    Toastify({
-      text: message,
-      duration: 3000,
-      gravity: "top",
-      position: "right",
-      style: {
-        background: bgColors[type],
-        borderRadius: "8px",
-        fontFamily: "'Inter', sans-serif",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
+    if (postId) {
+      // Update existing post
+      const index = state.posts.findIndex(post => post.id === parseInt(postId));
+      if (index !== -1) {
+        state.posts[index].title = title;
+        state.posts[index].author = author;
+        state.posts[index].content = content;
+        state.posts[index].lastEdited = new Date().toISOString();
+        
+        showAlert('Post updated successfully!', 'success');
       }
-    }).showToast();
+    } else {
+      // Create new post
+      const newPost = {
+        id: Date.now(),
+        title,
+        author,
+        content,
+        date: new Date().toISOString(),
+        likes: 0
+      };
+      
+      state.posts.push(newPost);
+      showAlert('Post published successfully!', 'success');
+    }
+    
+    savePostsToStorage();
+    navigateToHome();
+  }
+
+  function handleDeletePost(postId) {
+    if (confirm('Are you sure you want to delete this post?')) {
+      state.posts = state.posts.filter(post => post.id !== postId);
+      savePostsToStorage();
+      showAlert('Post deleted successfully!', 'success');
+      navigateToHome();
+    }
+  }
+
+  function handleLikePost(postId) {
+    const index = state.posts.findIndex(post => post.id === postId);
+    if (index !== -1) {
+      state.posts[index].likes++;
+      savePostsToStorage();
+      
+      // Update the UI
+      const likeButton = document.getElementById('like-button');
+      const likeCount = state.posts[index].likes;
+      likeButton.previousSibling.textContent = ` • ${likeCount} likes`;
+      
+      // Show a little animation
+      likeButton.textContent = '👍 Liked!';
+      likeButton.style.backgroundColor = '#28a745';
+      setTimeout(() => {
+        likeButton.textContent = '👍 Like';
+        likeButton.style.backgroundColor = '';
+      }, 1000);
+    }
+  }
+
+  function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    elements.alertContainer.innerHTML = '';
+    elements.alertContainer.appendChild(alertDiv);
+    
+    // Clear the alert after 3 seconds
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 3000);
   }
 });
